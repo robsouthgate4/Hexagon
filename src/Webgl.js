@@ -10,7 +10,14 @@ export default class Webgl {
 
         this.meshCount = 0
         this.meshListeners = []
-        this.renderer =  new THREE.WebGLRenderer()
+        this.renderer =  new THREE.WebGLRenderer({
+            antialias: true,
+            preserveDrawingBuffer: true,
+            logarithmicDepthBuffer: true
+        })
+
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         if ( ! this.renderer.extensions.get( 'WEBGL_depth_texture' ) ) { 
             alert('No depth!')
@@ -29,8 +36,8 @@ export default class Webgl {
        
         this.clock = new THREE.Clock()
 
-        this.camera = new THREE.PerspectiveCamera(45, w / h, 1, 1000)
-        this.camera.position.z = 30
+        this.camera = new THREE.PerspectiveCamera(45, w / h, 1, 40)
+        this.camera.position.z = 26
         this.camera.position.y = 0
         this.camera.position.x = 0
 
@@ -62,7 +69,7 @@ export default class Webgl {
     initHexagonGrid(geo) {
 
         const rows = 10
-        const cols = 10
+        const cols =10
 
         let hexagon
 
@@ -70,18 +77,18 @@ export default class Webgl {
 
             for (let j = 0; j < rows; j++) {
                 
+                //this.hexagonArray[row] = []
 
                 hexagon = this.createHexagonInstance(geo)
                 hexagon.position.y = (i * 1.7)    
                 hexagon.rotation.set(THREE.Math.degToRad(90),0,0)
                 this.container.add(hexagon)
                 hexagon.position.x = (j * 1.5)
-                hexagon.position.z = Math.random() * (2 - (-1)) + (-1);
-
+                hexagon.position.z = Math.random() * (1 - (-1)) + (-1);
+                //hexagon.position.z = 0
                 if(j % 2 == 0) {
                     hexagon.position.y += 0.85
                 }
-                
                 this.hexagonArray.push(hexagon)
 
             }          
@@ -116,17 +123,26 @@ export default class Webgl {
         light.name = 'pointlight';
         light.position.set( 0, 30, 5);
         //light.target.position.set( 0, 0, 0 );
-        light.castShadow = true
+        //light.castShadow = true
 
         const ambLight = new THREE.AmbientLight(0xdedede);
         ambLight.name = 'ambLight';
         ambLight.castShadow = true
-        this.scene.add(light, ambLight);
+        this.scene.add(light, ambLight)
 
-        
-        // this.directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-        // this.directionalLight.position.set(1, 0, 5)
-        // this.scene.add(this.directionalLight)
+
+        var lightShadow = new THREE.SpotLight( 0xdedede );
+        lightShadow.intensity = 0.1
+        lightShadow.position.set( -50, 30, 70 );
+        lightShadow.castShadow = true
+        this.scene.add(lightShadow)
+
+        lightShadow.shadow.mapSize.width = 1024;
+        lightShadow.shadow.mapSize.height = 1024;
+        lightShadow.shadow.camera.near = 500;
+        lightShadow.shadow.camera.far = 40;
+        lightShadow.shadow.camera.fov = 60;
+
     }
     
 
@@ -147,14 +163,8 @@ export default class Webgl {
         const dt = this.clock.getDelta()
 
         this.hexagonArray.forEach((hexagon, i) => {
-            //hexagon.position.z += (Math.sin(time / 100) * (i * 0.01))
+            //hexagon.position.z += Math.sin(time / 200) * i * 0.01
         })
-        
-
-        // let i = this.meshCount
-        // while (--i >= 0) {
-        //     this.meshListeners[i].apply(this, null)
-        // }
 
         //this.renderer.render(this.scene, this.camera)
 

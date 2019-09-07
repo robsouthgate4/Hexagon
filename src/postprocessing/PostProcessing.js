@@ -4,9 +4,11 @@ import 'three/examples/js/shaders/SSAOShader'
 import 'three/examples/js/postprocessing/EffectComposer.js'
 import 'three/examples/js/postprocessing/RenderPass.js'
 import 'three/examples/js/postprocessing/ShaderPass.js'
-import 'three/examples/js/SimplexNoise'
+import 'three/examples/js/SimplexNoise.js'
 import 'three/examples/js/postprocessing/SSAOPass.js'
-import 'three/examples/js/postprocessing/MaskPass'
+import 'three/examples/js/postprocessing/MaskPass.js'
+import 'three/examples/js/shaders/SepiaShader'
+import ToneMapping from './ToneMapping.js'
 
 import blendGlow from './blendGlow'
 
@@ -27,21 +29,31 @@ export default class PostProcessing {
         this.composer = new THREE.EffectComposer(this.renderer)
         
 
-        var ssaoPass = new THREE.SSAOPass( this.scene, this.camera, this.width, this.height )
-        ssaoPass.kernelRadius = 0.2
+      
 
-        ssaoPass.renderToScreen = true
-        this.composer.addPass( ssaoPass )
+        var renderPass = new THREE.RenderPass(this.scene, this.camera);
+        //renderPass.renderToScreen = true
+        this.composer.addPass(renderPass);
 
-        ssaoPass.output = 0
-        ssaoPass.minDistance = 0.0001
-        ssaoPass.maxDistance = 0.3
+        // var ssaoPass = new THREE.SSAOPass( this.scene, this.camera, this.width, this.height )
+        // ssaoPass.kernelRadius = 0.03
+
+        // ssaoPass.renderToScreen = true
+        // this.composer.addPass( ssaoPass )
+
+        // ssaoPass.output = 0
+        // ssaoPass.minDistance = 0.01
+        // ssaoPass.maxDistance = 0.3
+        
+        var shaderPass = new THREE.ShaderPass(ToneMapping);      
+        shaderPass.renderToScreen = true
+        this.composer.addPass(shaderPass);
 
     }
 
     resize() {
-        //this.renderer.setSize(this.width, this.height )
-        this.composer.setSize(this.width * window.devicePixelRatio, this.height * window.devicePixelRatio)
+        //this.renderer.setSize(this.width, this.height)
+        this.composer.setSize(this.width, this.height)
     }
 
     render(dt) {
