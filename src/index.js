@@ -44,7 +44,6 @@ window.addEventListener('resize', onResize)
 window.addEventListener('orientationchange', onResize)
 
 
-
 const callbackOnLoad = (event) => { 
 
     const geo = event.detail.loaderRootNode

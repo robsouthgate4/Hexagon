@@ -27,16 +27,18 @@ export default class PostProcessing {
     init() {
 
         this.composer = new THREE.EffectComposer(this.renderer)
-        
-
-      
 
         var renderPass = new THREE.RenderPass(this.scene, this.camera);
-        //renderPass.renderToScreen = true
         this.composer.addPass(renderPass);
+        
+        
+        var shaderPass = new THREE.ShaderPass(ToneMapping);      
+        shaderPass.renderToScreen = true
+        this.composer.addPass(shaderPass);
+
 
         // var ssaoPass = new THREE.SSAOPass( this.scene, this.camera, this.width, this.height )
-        // ssaoPass.kernelRadius = 0.03
+        // ssaoPass.kernelRadius = 0.02
 
         // ssaoPass.renderToScreen = true
         // this.composer.addPass( ssaoPass )
@@ -44,10 +46,6 @@ export default class PostProcessing {
         // ssaoPass.output = 0
         // ssaoPass.minDistance = 0.01
         // ssaoPass.maxDistance = 0.3
-        
-        var shaderPass = new THREE.ShaderPass(ToneMapping);      
-        shaderPass.renderToScreen = true
-        this.composer.addPass(shaderPass);
 
     }
 
