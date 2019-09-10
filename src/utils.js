@@ -24,4 +24,8 @@ export default class Utils {
         return (value - start1) / (stop1 - start1) * (stop2 - start2) + start2
     }
 
+    static clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max)
+    }
+
 }

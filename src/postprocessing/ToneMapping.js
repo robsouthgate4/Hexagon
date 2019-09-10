@@ -54,7 +54,7 @@ const ToneMapping = {
 
 		void main() {
 			vec4 color = texture2D( tDiffuse, vUv );
-			gl_FragColor = vec4(tonemapUncharted2(color.rgb) * 1.9, 1.0);
+			gl_FragColor = vec4(tonemapReinhard(color.rgb * 2.0) * 1.2, 1.0);
 		}`
 
 };

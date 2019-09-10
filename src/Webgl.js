@@ -35,8 +35,8 @@ export default class Webgl {
         this.scene.background = new THREE.Color(0xdedede)
         this.container = new THREE.Object3D()
         this.grid = {
-            cols: 10,
-            rows: 10
+            cols: 30,
+            rows: 30
         }
 
         this.dom = this.renderer.domElement 
@@ -109,6 +109,12 @@ export default class Webgl {
                     z: hexagon.rotation.z
                 }
 
+                hexagon.initialPosition = {
+                    x: hexagon.position.x,
+                    y: hexagon.position.y,
+                    z: hexagon.position.z
+                }
+
                 if(j % 2 == 0) {
                     hexagon.position.y += 0.85
                 }
@@ -123,7 +129,7 @@ export default class Webgl {
 
         }        
 
-        this.container.position.set(-7, -8, 0)
+        this.container.position.set(-21, -24, 0)
         
         this.scene.add(this.container)
 
@@ -132,10 +138,10 @@ export default class Webgl {
     addFloor() {
 
         const geometry = new THREE.PlaneGeometry(100, 100)
-        const material = new THREE.ShadowMaterial({ opacity: .3 });
+        const material = new THREE.ShadowMaterial({ opacity: 0.3 });
         this.floor = new THREE.Mesh(geometry, material)
-        this.floor.position.y = 0;
-        this.floor.rotateX(- Math.PI / 2)
+        this.floor.position.z = 0;
+        //this.floor.rotateX(- Math.PI / 2)
 
         this.scene.add(this.floor);
     }
@@ -164,8 +170,8 @@ export default class Webgl {
         this.scene.add(light, ambLight)
 
         var lightShadow = new THREE.SpotLight( 0xdedede );
-        lightShadow.intensity = 0.
-        lightShadow.position.set( -50, 30, 70 );
+        lightShadow.intensity = 0
+        lightShadow.position.set( -50, 30, 30 );
         lightShadow.castShadow = true
         this.scene.add(lightShadow)
 
@@ -196,7 +202,7 @@ export default class Webgl {
 
         if (intersects.length) {
 
-            const { x, z } = intersects[0].point;
+            const { x, y } = intersects[0].point;
 
             for (let i = 0; i < this.grid.cols; i++) {
 
@@ -205,17 +211,25 @@ export default class Webgl {
                     const hexagon = this.hexagonArray[i][j]
                     
 
-                    // const mouseDistance = Utils.distance(x, z,
-                    //     hexagon.position.x + this.container.position.x,
-                    //     hexagon.position.z + this.container.position.z);
+                    const mouseDistance = Utils.distance(x, y,
+                        hexagon.position.x + this.container.position.x,
+                        hexagon.position.y + this.container.position.y)
 
-                    //     const maxPositionY = 10;
-                    //     const minPositionY = 0;
-                    //     const startDistance = 6;
-                    //     const endDistance = 0;
-                    //     const y = Utils.map(mouseDistance, startDistance, endDistance, minPositionY, maxPositionY);
+                        const maxPositionY = 7;
+                        const minPositionY = 4;
+                        const startDistance = 3;
+                        const endDistance = 0;
+                        const z = Utils.map(mouseDistance, startDistance, endDistance, minPositionY, maxPositionY);
 
-                    //     hexagon.scale.set(1,1,1)
+                        if(i === 0 && j === 0) {
+                            //hexagon.position.z = 0.5;
+                            console.log(z)
+                        }
+
+                        hexagon.position.z = (hexagon.initialPosition.z + (Utils.clamp(z, 0, 8) * 0.5)) 
+                        
+                        
+                        
 
                 }
             }
