@@ -1,8 +1,8 @@
 
 import PostProcessing from './postprocessing/PostProcessing'
-import vertexShader from 'raw-loader!glslify-loader!./materials/shaders/hexagon.vert'
-import fragmentShader from 'raw-loader!glslify-loader!./materials/shaders/hexagon.frag'
-import { OneMinusDstAlphaFactor } from 'three'
+import { TweenMax, SlowMo } from 'gsap'
+import normalMap from './assets/images/normalMap.jpg'
+
 import Utils from './utils'
 
 export default class Webgl {
@@ -34,6 +34,7 @@ export default class Webgl {
         this.height = h
         this.scene.background = new THREE.Color(0xdedede)
         this.container = new THREE.Object3D()
+
         this.grid = {
             cols: 30,
             rows: 30
@@ -46,7 +47,6 @@ export default class Webgl {
         this.hexagonArray = []
         this.object3D
         this.container
-
         this.update = this.update.bind(this)
         this.resize = this.resize.bind(this)
 
@@ -75,14 +75,12 @@ export default class Webgl {
     }
 
     init(geo) {
-
         this.createCamera()        
         this.initHexagonGrid(geo)
         this.addFloor()
         this.setLights()
         this.initPostProcessing()
-        this.resize(this.width, this.height)
-        
+        this.resize(this.width, this.height)        
     }
 
     initHexagonGrid(geo) {
@@ -107,6 +105,10 @@ export default class Webgl {
                     x: hexagon.rotation.x,
                     y: hexagon.rotation.y,
                     z: hexagon.rotation.z
+                }                
+
+                if(j % 2 == 0) {
+                    hexagon.position.y += 0.85
                 }
 
                 hexagon.initialPosition = {
@@ -115,14 +117,8 @@ export default class Webgl {
                     z: hexagon.position.z
                 }
 
-                if(j % 2 == 0) {
-                    hexagon.position.y += 0.85
-                }
-
                 this.hexagonArray.push(hexagon)
-
                 this.container.add(hexagon)
-
                 this.hexagonArray[i][j] = hexagon
 
             }          
@@ -148,7 +144,9 @@ export default class Webgl {
 
     createHexagonInstance(geo) {
 
-        const material = new THREE.MeshStandardMaterial( {color: 0xdedede, metalness: 0, roughness: 0} );
+        console.log(THREE.ImageUtils.loadTexture(normalMap))
+
+        const material = new THREE.MeshStandardMaterial( {color: 0xFFFFFF, metalness: 0, roughness: 0, normalMap : THREE.ImageUtils.loadTexture(normalMap)} );
         const hexagon = new THREE.Mesh( geo.children[0].geometry, material );
         hexagon.castShadow = true;
         hexagon.receiveShadow = true;
@@ -208,26 +206,26 @@ export default class Webgl {
 
                 for (let j = 0; j < this.grid.rows; j++) {
 
-                    const hexagon = this.hexagonArray[i][j]
-                    
+                    const hexagon = this.hexagonArray[i][j]                    
 
                     const mouseDistance = Utils.distance(x, y,
                         hexagon.position.x + this.container.position.x,
                         hexagon.position.y + this.container.position.y)
 
-                        const maxPositionY = 7;
-                        const minPositionY = 4;
-                        const startDistance = 3;
-                        const endDistance = 0;
-                        const z = Utils.map(mouseDistance, startDistance, endDistance, minPositionY, maxPositionY);
+                        const maxPositionY = 7
+                        const minPositionY = 4
+                        const startDistance = 3
+                        const endDistance = 0
+                        const z = Utils.map(mouseDistance, startDistance, endDistance, minPositionY, maxPositionY)
 
-                        if(i === 0 && j === 0) {
-                            //hexagon.position.z = 0.5;
-                            console.log(z)
-                        }
-
-                        hexagon.position.z = (hexagon.initialPosition.z + (Utils.clamp(z, 0, 8) * 0.5)) 
+                    
                         
+                        TweenMax.to(hexagon.position, 3, {
+                            ease: SlowMo.ease.config(0.1, 2, false),
+                            x: hexagon.initialPosition.x,
+                            y: hexagon.initialPosition.y,
+                            z: (hexagon.initialPosition.z + (Utils.clamp(z, 0, 8) * 0.5)),
+                          });
                         
                         
 

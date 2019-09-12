@@ -52,9 +52,21 @@ const ToneMapping = {
 			return color / (color + vec3(1.0));
 		}
 
+		vec3 gammaCorrect(vec3 color, float gamma){
+			return pow(color, vec3(1.0/gamma));
+		}
+		
+		vec3 levelRange(vec3 color, float minInput, float maxInput){
+			return min(max(color - vec3(minInput), vec3(0.0)) / (vec3(maxInput) - vec3(minInput)), vec3(1.0));
+		}
+		
+		vec3 finalLevels(vec3 color, float minInput, float gamma, float maxInput){
+			return gammaCorrect(levelRange(color, minInput, maxInput), gamma);
+		}
+
 		void main() {
 			vec4 color = texture2D( tDiffuse, vUv );
-			gl_FragColor = vec4(tonemapReinhard(color.rgb * 2.0) * 1.2, 1.0);
+			gl_FragColor = vec4(finalLevels(color.rgb, 55.0/255.0, 0.5, 253.0/255.0), 1.0);
 		}`
 
 };

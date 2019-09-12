@@ -32,11 +32,7 @@ export default class PostProcessing {
         this.composer.addPass(renderPass);
         
         
-        // var shaderPass = new THREE.ShaderPass(ToneMapping);      
-        // shaderPass.renderToScreen = true
-        // this.composer.addPass(shaderPass);
-
-
+        
         var ssaoPass = new THREE.SSAOPass( this.scene, this.camera, this.width, this.height )
         ssaoPass.kernelRadius = 0.015
 
@@ -46,6 +42,11 @@ export default class PostProcessing {
         ssaoPass.output = 0
         ssaoPass.minDistance = 0.0005
         ssaoPass.maxDistance = 0.01
+
+        // var shaderPass = new THREE.ShaderPass(ToneMapping);      
+        // shaderPass.renderToScreen = true
+        // this.composer.addPass(shaderPass);
+
 
 
     }
