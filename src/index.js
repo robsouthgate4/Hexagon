@@ -10,7 +10,7 @@ import './styles.css'
 
 
 const Stats = require('stats.js')
-const stats = new Stats()
+// const stats = new Stats()
 //stats.showPanel( 0 ) // 0: fps, 1: ms, 2: mb, 3+: custom
 
 const container = document.querySelector('.webgl-hero')
