@@ -3,7 +3,17 @@ import PostProcessing from './postprocessing/PostProcessing'
 import { TweenMax, SlowMo } from 'gsap'
 import normalMap from './assets/images/normalMap.jpg'
 
+
 import Utils from './utils'
+
+
+function importAll(r) {
+    console.log(r)
+    return r.keys().map(r);
+}
+  
+const images = importAll(require.context('./assets/images/cube', false, /\.(png|jpe?g|svg)$/))
+
 
 export default class Webgl {
 
@@ -52,6 +62,8 @@ export default class Webgl {
 
         this.mouse3D = new THREE.Vector2();
 
+        
+
         window.addEventListener('mousemove', this.onMouseMove.bind(this), { passive: true})
         
         this.onMouseMove({ clientX: 0, clientY: 0 })
@@ -67,6 +79,10 @@ export default class Webgl {
         this.camera.position.z = 26
         this.camera.position.y = 0
         this.camera.position.x = 0
+
+        this.cubeCamera = new THREE.CubeCamera( 1, 100000, 128 );
+        this.scene.add( this.cubeCamera );
+        this.cubeCamera.position.copy(this.camera)
     }
 
     initPostProcessing() {
@@ -85,7 +101,14 @@ export default class Webgl {
 
     initHexagonGrid(geo) {
 
-        let hexagon
+        let hexagon   
+  
+        var loader = new THREE.CubeTextureLoader();
+        console.log(loader)
+
+        var textureCube = loader.load(images);
+
+
 
         for (let i = 0; i < this.grid.cols; i++) {
 
@@ -93,7 +116,7 @@ export default class Webgl {
 
             for (let j = 0; j < this.grid.rows; j++) {
 
-                hexagon = this.createHexagonInstance(geo)
+                hexagon = this.createHexagonInstance(geo, textureCube)
                 hexagon.position.y = (i * 1.7)    
                 hexagon.rotation.set(THREE.Math.degToRad(90),0,0)
                 
@@ -117,13 +140,18 @@ export default class Webgl {
                     z: hexagon.position.z
                 }
 
+                
+
                 this.hexagonArray.push(hexagon)
                 this.container.add(hexagon)
                 this.hexagonArray[i][j] = hexagon
+                
 
             }          
 
-        }        
+        }   
+
+             
 
         this.container.position.set(-21, -24, 0)
         
@@ -137,21 +165,34 @@ export default class Webgl {
         const material = new THREE.ShadowMaterial({ opacity: 0.3 });
         this.floor = new THREE.Mesh(geometry, material)
         this.floor.position.z = 0;
-        //this.floor.rotateX(- Math.PI / 2)
 
         this.scene.add(this.floor);
     }
 
-    createHexagonInstance(geo) {
+    createHexagonInstance(geo, cubeTexture) {
+        
+        const material = new THREE.MeshStandardMaterial(
+            { 
+                color: 0xffffff, 
+                metalness: 0.1, 
+                roughness: 0,
+                normalMap: THREE.ImageUtils.loadTexture(normalMap),
+                envMap: this.cubeCamera.renderTarget.texture
+            }
+        );
 
-        console.log(THREE.ImageUtils.loadTexture(normalMap))
+        material.needsUpdate = true;
 
-        const material = new THREE.MeshStandardMaterial( {color: 0xFFFFFF, metalness: 0, roughness: 0, normalMap : THREE.ImageUtils.loadTexture(normalMap)} );
-        const hexagon = new THREE.Mesh( geo.children[0].geometry, material );
-        hexagon.castShadow = true;
-        hexagon.receiveShadow = true;
+        const hexagon = new THREE.Mesh(geo.children[0].geometry, material);
+        // hexagon.castShadow = true;
+        // hexagon.receiveShadow = true;
+
+        
 
         return hexagon
+
+        
+
 
 
     }
@@ -167,17 +208,17 @@ export default class Webgl {
         ambLight.name = 'ambLight'
         this.scene.add(light, ambLight)
 
-        var lightShadow = new THREE.SpotLight( 0xdedede );
-        lightShadow.intensity = 0
-        lightShadow.position.set( -50, 30, 30 );
-        lightShadow.castShadow = true
-        this.scene.add(lightShadow)
+        // var lightShadow = new THREE.SpotLight( 0xdedede );
+        // lightShadow.intensity = 0.1
+        // lightShadow.position.set( -50, 30, 60 );
+        // lightShadow.castShadow = true
+        // this.scene.add(lightShadow)
 
-        lightShadow.shadow.mapSize.width = 1024;
-        lightShadow.shadow.mapSize.height = 1024;
-        lightShadow.shadow.camera.near = 500;
-        lightShadow.shadow.camera.far = 40;
-        lightShadow.shadow.camera.fov = 60;
+        // lightShadow.shadow.mapSize.width = 1024;
+        // lightShadow.shadow.mapSize.height = 1024;
+        // lightShadow.shadow.camera.near = 500;
+        // lightShadow.shadow.camera.far = 40;
+        // lightShadow.shadow.camera.fov = 60;
 
     }
     
@@ -206,7 +247,7 @@ export default class Webgl {
 
                 for (let j = 0; j < this.grid.rows; j++) {
 
-                    const hexagon = this.hexagonArray[i][j]                    
+                    const hexagon = this.hexagonArray[i][j]               
 
                     const mouseDistance = Utils.distance(x, y,
                         hexagon.position.x + this.container.position.x,
@@ -237,6 +278,8 @@ export default class Webgl {
         const dt = this.clock.getDelta()
 
         this.postProcessing.render(dt)
+
+        //this.renderer.render(this.scene, this.camera)
 
     }
 
