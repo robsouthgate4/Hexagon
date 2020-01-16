@@ -5,6 +5,7 @@ import normalMap from './assets/images/normalMap.jpg'
 
 
 import Utils from './utils'
+import { Color, Vector2 } from 'three'
 
 
 function importAll(r) {
@@ -42,7 +43,7 @@ export default class Webgl {
         this.scene = new THREE.Scene()
         this.width = w
         this.height = h
-        this.scene.background = new THREE.Color(0xdedede)
+        this.scene.background = new THREE.Color(0x000000)
         this.container = new THREE.Object3D()
 
         this.grid = {
@@ -119,6 +120,8 @@ export default class Webgl {
                 hexagon = this.createHexagonInstance(geo, textureCube)
                 hexagon.position.y = (i * 1.7)    
                 hexagon.rotation.set(THREE.Math.degToRad(90),0,0)
+
+                hexagon.scale.set(0.8, 0.8, 0.8);
                 
                 hexagon.position.x = (j * 1.5)
                 hexagon.position.z = Math.random() * (1 - (-1)) + (-1);
@@ -173,11 +176,12 @@ export default class Webgl {
         
         const material = new THREE.MeshStandardMaterial(
             { 
-                color: 0xffffff, 
-                metalness: 0.1, 
-                roughness: 0,
+                color: new Color(`rgb(10, 10 , 10)`), 
+                metalness: 0, 
+                roughness: 1,
                 normalMap: THREE.ImageUtils.loadTexture(normalMap),
-                envMap: this.cubeCamera.renderTarget.texture
+                normalScale: new Vector2(20, 20)
+                //envMap: this.cubeCamera.renderTarget.texture
             }
         );
 
