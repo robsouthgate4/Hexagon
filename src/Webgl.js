@@ -5,7 +5,7 @@ import normalMap from './assets/images/normalMap.jpg'
 
 
 import Utils from './utils'
-import { Color, Vector2 } from 'three'
+import { Color, Vector2, Colors } from 'three'
 
 
 function importAll(r) {
@@ -181,7 +181,6 @@ export default class Webgl {
                 roughness: 1,
                 normalMap: THREE.ImageUtils.loadTexture(normalMap),
                 normalScale: new Vector2(20, 20)
-                //envMap: this.cubeCamera.renderTarget.texture
             }
         );
 
@@ -206,23 +205,16 @@ export default class Webgl {
 
         const light = new THREE.PointLight( 0xFFFFFF, 1, );
         light.name = 'pointlight';
-        light.position.set( 0, 30, 5);
+        light.position.set( 0, 0, 5);
+
+        const light2 = new THREE.PointLight( new Color('rgb( 255, 0, 0 )'), 1);
+        light2.name = 'pointlight2';
+        light2.position.set( 0, 0, -5);
 
         const ambLight = new THREE.AmbientLight(0xdedede);
         ambLight.name = 'ambLight'
-        this.scene.add(light, ambLight)
 
-        // var lightShadow = new THREE.SpotLight( 0xdedede );
-        // lightShadow.intensity = 0.1
-        // lightShadow.position.set( -50, 30, 60 );
-        // lightShadow.castShadow = true
-        // this.scene.add(lightShadow)
-
-        // lightShadow.shadow.mapSize.width = 1024;
-        // lightShadow.shadow.mapSize.height = 1024;
-        // lightShadow.shadow.camera.near = 500;
-        // lightShadow.shadow.camera.far = 40;
-        // lightShadow.shadow.camera.fov = 60;
+        this.scene.add(light, light2, ambLight)
 
     }
     
