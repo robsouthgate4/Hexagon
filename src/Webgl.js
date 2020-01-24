@@ -277,7 +277,7 @@ export default class Webgl {
 
         this.postProcessing.render(dt)
 
-        this.light2.position.set( Math.sin( time * 0.001 ) * 10, 0, Math.cos( time * 0.001 ) * 10 );
+        this.light2.position.set( Math.sin( time * 0.0003 ) * 20, 0, Math.cos( time * 0.0003 ) * 20 );
 
         //this.renderer.render(this.scene, this.camera)
 
