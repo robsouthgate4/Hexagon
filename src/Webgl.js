@@ -51,6 +51,8 @@ export default class Webgl {
             rows: 30
         }
 
+        this.light2
+
         this.dom = this.renderer.domElement 
        
         this.clock = new THREE.Clock()
@@ -207,14 +209,14 @@ export default class Webgl {
         light.name = 'pointlight';
         light.position.set( 0, 0, 5);
 
-        const light2 = new THREE.PointLight( new Color('rgb( 255, 0, 0 )'), 1);
-        light2.name = 'pointlight2';
-        light2.position.set( 0, 0, -5);
+        this.light2 = new THREE.PointLight( new Color('rgb( 255, 0, 0 )'), 2);
+        this.light2.name = 'pointlight2';
+        this.light2.position.set( 0, 0, -5);
 
         const ambLight = new THREE.AmbientLight(0xdedede);
         ambLight.name = 'ambLight'
 
-        this.scene.add(light, light2, ambLight)
+        this.scene.add(light, this.light2, ambLight)
 
     }
     
@@ -274,6 +276,8 @@ export default class Webgl {
         const dt = this.clock.getDelta()
 
         this.postProcessing.render(dt)
+
+        this.light2.position.set( Math.sin( time * 0.001 ) * 10, 0, Math.cos( time * 0.001 ) * 10 );
 
         //this.renderer.render(this.scene, this.camera)
 
