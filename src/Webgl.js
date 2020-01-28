@@ -5,7 +5,7 @@ import normalMap from './assets/images/normalMap.jpg'
 
 
 import Utils from './utils'
-import { Color, Vector2, Colors } from 'three'
+import { Color, Vector2, Colors, Vector3 } from 'three'
 
 
 function importAll(r) {
@@ -178,15 +178,60 @@ export default class Webgl {
         
         const material = new THREE.MeshStandardMaterial(
             { 
-                color: new Color(`rgb(10, 10 , 10)`), 
-                metalness: 0, 
+                color: new Color(`rgb(5, 5 , 5)`), 
+                metalness: 0.2, 
                 roughness: 1,
-                normalMap: THREE.ImageUtils.loadTexture(normalMap),
-                normalScale: new Vector2(20, 20)
             }
         );
 
         material.needsUpdate = true;
+
+        material.onBeforeCompile = ( shader ) => {
+
+            const size = new Vector3( 1, 1, 1 );
+            
+            shader.uniforms.time = { value: 0 };
+            shader.uniforms.size = { value: size};
+            shader.uniforms.color1 = {value: new THREE.Color(0xff0080)};
+            shader.uniforms.color2 = {value: new THREE.Color(0xfff000)};
+            shader.vertexShader = 'varying vec4 vWorldPosition;\n' + shader.vertexShader;
+            shader.vertexShader = shader.vertexShader.replace(
+              '#include <worldpos_vertex>',
+              [
+                '#include <worldpos_vertex>',
+                'vWorldPosition = modelMatrix * vec4( transformed, 1.0 );'
+              ].join( '\n' )
+            );
+            shader.fragmentShader = `
+            
+            uniform float time;
+            uniform vec3 size;
+            uniform vec3 color1;
+            uniform vec3 color2;
+            varying vec4 vWorldPosition;
+
+            float thicknessPower;
+            float thicknessScale;
+            float thicknessDistortion;
+            float thicknessAmbient;
+            float thicknessAttenuation;
+            vec3 thicknessColor;
+
+            ${ shader.fragmentShader }
+            `;
+            shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <dithering_fragment>',
+              [
+                '#include <dithering_fragment>',
+                           
+
+                'float gridRatio = sin( time ) * 0.1875 + 0.3125;', // 0.125 .. 0.5
+                'vec3 m = abs( sin( vWorldPosition.xyz * gridRatio ) );',
+                'vec3 gridColor = mix(color1, color2, vWorldPosition.y / size.y);',
+                '//gl_FragColor = vec4( mix( gridColor, gl_FragColor.rgb, m.x * m.y * m.z ), diffuseColor.a );'
+              ].join( '\n' )
+            );
+        }
 
         const hexagon = new THREE.Mesh(geo.children[0].geometry, material);
         // hexagon.castShadow = true;
@@ -205,11 +250,11 @@ export default class Webgl {
 
     setLights() {
 
-        const light = new THREE.PointLight( 0xFFFFFF, 1, );
+        const light = new THREE.PointLight( 0xFFFFFF, 1 );
         light.name = 'pointlight';
         light.position.set( 0, 0, 5);
 
-        this.light2 = new THREE.PointLight( new Color('rgb( 255, 0, 0 )'), 2);
+        this.light2 = new THREE.PointLight( new Color('rgb( 255, 0, 0 )'), 3);
         this.light2.name = 'pointlight2';
         this.light2.position.set( 0, 0, -5);
 
@@ -255,17 +300,14 @@ export default class Webgl {
                         const minPositionY = 4
                         const startDistance = 3
                         const endDistance = 0
-                        const z = Utils.map(mouseDistance, startDistance, endDistance, minPositionY, maxPositionY)
-
-                    
+                        const z = Utils.map(mouseDistance, startDistance, endDistance, minPositionY, maxPositionY);                    
                         
                         TweenMax.to(hexagon.position, 3, {
                             ease: SlowMo.ease.config(0.1, 2, false),
                             x: hexagon.initialPosition.x,
                             y: hexagon.initialPosition.y,
                             z: (hexagon.initialPosition.z + (Utils.clamp(z, 0, 8) * 0.5)),
-                          });
-                        
+                          });                      
                         
 
                 }
@@ -273,16 +315,27 @@ export default class Webgl {
 
         }
 
-        const dt = this.clock.getDelta()
+        const dt = this.clock.getDelta();
 
-        this.postProcessing.render(dt)
+        this.postProcessing.render(dt);
 
-        this.light2.position.set( Math.sin( time * 0.0003 ) * 20, 0, Math.cos( time * 0.0003 ) * 20 );
+        const { x, y } = intersects[0].point;
 
-        //this.renderer.render(this.scene, this.camera)
+        this.light2.position.set( x , y , -5);
+
+        this.renderer.render(this.scene, this.camera)
 
     }
 
     
     
 }
+
+
+// void RE_Direct_Scattering(const in IncidentLight directLight, const in vec2 uv, const in GeometricContext geometry, inout ReflectedLight reflectedLight) {
+//     vec3 thickness = thicknessColor * 1.0;
+//     vec3 scatteringHalf = normalize(directLight.direction + (geometry.normal * thicknessDistortion));
+//     float scatteringDot = pow(saturate(dot(geometry.viewDir, -scatteringHalf)), thicknessPower) * thicknessScale;
+//     vec3 scatteringIllu = (scatteringDot + thicknessAmbient) * thickness;
+//     reflectedLight.directDiffuse += scatteringIllu * thicknessAttenuation * directLight.color;
+// }

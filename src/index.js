@@ -6,9 +6,21 @@ import translucentPhong from './materials/translucentPhong'
 import Webgl from './Webgl'
 
 import sun from './assets/images/lab/sun2.png';
+import hamiltonVideo from './assets/videos/portfolio/hamilton.mp4';
+import fangioVideo from './assets/videos/portfolio/fangio.mp4';
+import caracciolaVideo from './assets/videos/portfolio/caracciola.mp4';
 
 import './styles.css'
 
+import profileIcon from './assets/images/cv/mini-profile.png';
+import { Linear } from 'gsap'
+
+var cvimg = document.querySelector('.cv-profile');
+cvimg.src = profileIcon;
+
+
+const name = document.querySelector( '.site .name' );
+const title = document.querySelector( '.site .name .title' );
 
 const Stats = require('stats.js')
 // const stats = new Stats()
@@ -56,51 +68,132 @@ const callbackOnLoad = (event) => {
 
 loader.load(hexagonObj, callbackOnLoad, null, null, null, false)
 
-const projects = [
+const experiments = [
 
     {
         name: "Sun Particles",
-        tech: "WebGL GPGPU"
+        tech: "WebGL GPGPU",
+        image: sun
     },
     {
         name: "Plexus statue",
-        tech: "WebGL Houdini"
+        tech: "WebGL Houdini",
+        image: sun
     }
 
+];
+
+const projects = [
+
+    {
+        name: "Mercedes Roar Hamilton",
+        tech: "Instagram / Facebook",
+        videoSrc: hamiltonVideo,
+        threeCol: true,
+    },
+    {
+        name: "Mercedes Roar Fangio",
+        tech: "Instagram / Facebook",
+        videoSrc: fangioVideo,
+        threeCol: true
+    },
+    {
+        name: "Mercedes Roar Caracciola",
+        tech: "Instagram / Facebook",
+        videoSrc: caracciolaVideo,
+        threeCol: true
+    }
+    
 ];
 
 
 // Generate HTML
 
 const lab = document.createElement( 'ul' );
-lab.className = "lab"
+lab.className = "lab content"
 
-const item1 = createItem();
-const item2 = createItem();
-const item3 = createItem();
+const portfolio = document.createElement( 'ul' );
+portfolio.className = "portfolio content"
 
-lab.appendChild( item1 );
-lab.appendChild( item2 );
-lab.appendChild( item3 );
 
 document.body.appendChild( lab );
+document.body.appendChild( portfolio );
 
-function createItem () {
+function createItem ( project ) {
 
-    const li = document.createElement( 'li' );
-    const sunImg = document.createElement( 'img' );
+    const li = document.createElement( 'li' );   
     const title = document.createElement( 'h2' );
+   
 
-    title.innerText = "Sun GPGPU";
+    title.innerText = project.name;
     title.className = "title";
-    sunImg.src = sun
+    
 
-    li.appendChild( sunImg );
-    li.appendChild( title );
+   const tech = document.createElement( 'p' );
+   tech.innerText = project.tech;
+    
+
+    if ( project.image ) {
+
+        const sunImg = document.createElement( 'img' );
+        sunImg.src = sun
+        li.appendChild( sunImg );
+        li.appendChild( title );
+
+    }
+
+    if ( project.videoSrc ) {
+
+        
+
+        const video = document.createElement( 'video' );
+        video.src = project.videoSrc;
+        video.autoplay = false;
+        video.loop = true;
+        video.controls = false;
+        li.append( video );
+
+        li.classList.add( 'mobile-display' );
+
+        const text = document.createElement( 'div' );
+        text.classList.add( 'text' );
+        text.appendChild(title);
+
+        text.appendChild( tech );
+
+        li.appendChild( text );
+
+        li.addEventListener( 'mouseenter', ()  => {
+
+            video.play();
+            
+        })
+
+        li.addEventListener( 'mouseleave', ()  => {
+
+            video.pause();
+            
+        })
+
+    }
+    
 
     return li;
 
 }
+
+
+experiments.forEach( ( project ) => {
+
+    lab.appendChild( createItem( project ) );
+    
+} );
+
+projects.forEach( ( project ) => {
+
+    portfolio.appendChild( createItem( project ) );
+    
+} );
 
 
 const mainMenuItems = document.querySelectorAll( '.main-menu li a' );
@@ -109,13 +202,18 @@ mainMenuItems.forEach( ( item )  => {
 
     item.addEventListener( 'click', ( e ) => {
 
+        // lab.classList.remove( 'show' );
+        // portfolio.classList.remove( 'show' );
+
         if ( e.target.id === "lab" ) {
-
-
-             lab.classList.contains( 'show') ? lab.classList.remove( 'show' ) : lab.classList.add( 'show' );
-
-
+        
+            lab.classList.contains( 'show') ? lab.classList.remove( 'show' ) : lab.classList.add( 'show' );
         }
+
+        if ( e.target.id === "portfolio" ) {
+        
+            portfolio.classList.contains( 'show') ? portfolio.classList.remove( 'show' ) : portfolio.classList.add( 'show' );
+       }
 
     } );
 
@@ -126,3 +224,18 @@ mainMenuItems.forEach( ( item )  => {
 
 
 
+window.addEventListener( 'load', (  ) => {
+
+    setTimeout(() => {
+
+        name.classList.add( 'show' );
+
+    }, 300);
+
+    setTimeout(() => {
+
+        title.classList.add( 'show' );
+
+    }, 500);
+
+} )

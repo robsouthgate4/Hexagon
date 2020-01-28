@@ -47,7 +47,7 @@ module.exports = env => {
                     ]
                 },
                 {
-                    test: /\.(png|svg|jpg|gif|obj)$/,
+                    test: /\.(mp4|png|svg|jpg|gif|obj)$/,
                     loader: 'file-loader',
                     options: {
                         //useRelativePath: true
