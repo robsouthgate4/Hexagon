@@ -186,53 +186,6 @@ export default class Webgl {
 
         material.needsUpdate = true;
 
-        material.onBeforeCompile = ( shader ) => {
-
-            const size = new Vector3( 1, 1, 1 );
-            
-            shader.uniforms.time = { value: 0 };
-            shader.uniforms.size = { value: size};
-            shader.uniforms.color1 = {value: new THREE.Color(0xff0080)};
-            shader.uniforms.color2 = {value: new THREE.Color(0xfff000)};
-            shader.vertexShader = 'varying vec4 vWorldPosition;\n' + shader.vertexShader;
-            shader.vertexShader = shader.vertexShader.replace(
-              '#include <worldpos_vertex>',
-              [
-                '#include <worldpos_vertex>',
-                'vWorldPosition = modelMatrix * vec4( transformed, 1.0 );'
-              ].join( '\n' )
-            );
-            shader.fragmentShader = `
-            
-            uniform float time;
-            uniform vec3 size;
-            uniform vec3 color1;
-            uniform vec3 color2;
-            varying vec4 vWorldPosition;
-
-            float thicknessPower;
-            float thicknessScale;
-            float thicknessDistortion;
-            float thicknessAmbient;
-            float thicknessAttenuation;
-            vec3 thicknessColor;
-
-            ${ shader.fragmentShader }
-            `;
-            shader.fragmentShader = shader.fragmentShader.replace(
-              '#include <dithering_fragment>',
-              [
-                '#include <dithering_fragment>',
-                           
-
-                'float gridRatio = sin( time ) * 0.1875 + 0.3125;', // 0.125 .. 0.5
-                'vec3 m = abs( sin( vWorldPosition.xyz * gridRatio ) );',
-                'vec3 gridColor = mix(color1, color2, vWorldPosition.y / size.y);',
-                '//gl_FragColor = vec4( mix( gridColor, gl_FragColor.rgb, m.x * m.y * m.z ), diffuseColor.a );'
-              ].join( '\n' )
-            );
-        }
-
         const hexagon = new THREE.Mesh(geo.children[0].geometry, material);
         // hexagon.castShadow = true;
         // hexagon.receiveShadow = true;
